@@ -1,0 +1,67 @@
+
+
+services:
+  # 1. Base de Datos (Compartida por Alpha y Gamma)
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: delta-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - internal-network
+
+  # 2. NanoLedger API (Java)
+  nanoledger-api:
+    build:
+      context: ../../NanoLedgerAPI
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=jdbc:postgresql://postgres-db:5432/${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASSWORD}
+    depends_on:
+      - postgres-db
+    networks:
+      - internal-network
+
+  # 3. EventHub Backend (NestJS)
+  eventhub-backend:
+    build:
+      context: ../../eventhub-backend
+    ports:
+      - "3001:3000" # Host 3001 -> Contenedor 3000
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres-db:5432/${DB_NAME}
+    depends_on:
+      - postgres-db
+    networks:
+      - internal-network
+
+  # 4. EventHub Frontend (Next.js)
+  eventhub-frontend:
+    build:
+      context: ../../eventhub-frontend
+    ports:
+      - "3000:3000" # El puerto estándar de Next.js
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001 # Apunta al puerto del HOST del backend
+    depends_on:
+      - eventhub-backend
+    networks:
+      - internal-network
+
+  # 5. CryptoWatch (Next.js)
+  cryptowatch-frontend:
+    build:
+      context: ../../cryptowatch
+    ports:
+      - "3002:3000" # Host 3002 -> Contenedor 3000
+    networks:
+      - internal-network
+
+networks:
+  internal-network:
+    driver: bridge
