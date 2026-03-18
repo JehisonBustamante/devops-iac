@@ -53,14 +53,6 @@ services:
     networks:
       - internal-network
 
-  # 5. CryptoWatch (Next.js)
-  cryptowatch-frontend:
-    build:
-      context: ../../cryptowatch
-    ports:
-      - "3002:3000" # Host 3002 -> Contenedor 3000
-    networks:
-      - internal-network
 
 networks:
   internal-network:

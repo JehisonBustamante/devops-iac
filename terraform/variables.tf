@@ -21,7 +21,24 @@ variable "services" {
   default     = {
     nanoledger-api      = "nanoledger-api"
     eventhub-backend    = "eventhub-backend"
-    eventhub-frontend   = "eventhub-frontend"
-    cryptowatch-frontend = "cryptowatch-frontend"
   }
+}
+variable "db_host" {
+  type        = string
+  default     = "aws-1-us-east-1.pooler.supabase.com"
+}
+
+variable "db_username" {
+  type        = string
+  default     = "postgres.xctducmavvquzdfllzbx"
+}
+
+variable "db_password" {
+  type        = string
+  sensitive   = true # Esto oculta la clave en los logs
+}
+
+variable "jwt_secret" {
+  type        = string
+  sensitive   = true
 }
